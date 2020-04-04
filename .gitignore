@@ -1,0 +1,4 @@
+.env
+__pycache__
+profile_auth_secret.json
+token.pickle

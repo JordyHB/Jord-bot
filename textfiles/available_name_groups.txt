@@ -1,0 +1,34 @@
+human male
+human female
+human town
+halfling male
+halfling female
+halfling town
+dwarvish male
+dwarvish female
+dwarvish town
+elvish male
+elvish female
+elvish town
+draconic male
+draconic female
+drow male
+drow female
+drow town
+orcish male
+orcish female
+orcish town
+celestial
+fiendish
+town
+inn
+tome
+greek male
+greek female
+greek town
+roman male
+roman female
+roman town
+celtic male
+celtic female
+celtic town

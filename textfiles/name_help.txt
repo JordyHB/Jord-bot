@@ -1,0 +1,20 @@
+```Please follow this format !name human (male/female/town)
+
+Here are all the options:
+
+1. Human(male/female/town)
+2. Dwarvish(male/female/town)
+3. Elvish(male/female/town)
+4. Halfling(male/female/town)
+5. Draconic(male/female)
+6. Drow(male/female/town)
+7. Orcish(male/female/town)
+8. Celestial
+9. Fiendish
+10. Town (gets names for towns and cities)
+11. Inn (gets names for inns and taverns)
+12. Tome (gets names for books and tomes)
+13. Greek(male/female/town)
+14. Roman(male/female/town)
+15. Celtic(male/female/town)
+```
