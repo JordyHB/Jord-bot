@@ -1,0 +1,16 @@
+```This is a list of the available commands (work in progress)
+
+1. !addprofile (gives you a link to add a new profile to the pool)
+2. !showprofiles (shows you all unclaimed profiles)
+3. !myprofiles (shows you all the progress you claimed)
+4. !activeprofile (shows you youre active profile) [Not working yet]
+5. !claimprofile (lets you claim a profile)
+6. !unclaimprofile (lets you unclaim a profile)
+7. !selectprofile (lets you select which profile you want active) [Not working yet]
+8. !r [d20-3/+3 adv/dadv/sort] (lets you roll any number/size of dize)
+9. !check [adv/dadv] (lets you roll the requested check with correct modifiers)
+10. !skill [adv/dadv] (lets you roll the requested skill with correct modifiers)
+11. !save [adv/dadv] (lets you roll the requested save with correct modifiers)
+12. !Nhelp (opens the help file for the !name command)
+13. !name (gives you a set of random names)
+```

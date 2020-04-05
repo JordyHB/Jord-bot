@@ -3,10 +3,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('profile_auth_secret.json', scope)
-client = gspread.authorize(creds)
+Client = gspread.authorize(creds)
 
-profile_sheet = client.open('dnd_profiles').sheet1
-user_sheet = client.open('dnd_profiles').get_worksheet(1)
+profile_sheet = Client.open('dnd_profiles').sheet1
+user_sheet = Client.open('dnd_profiles').get_worksheet(1)
 
 
 class PHandler():
@@ -37,8 +37,12 @@ class PHandler():
     def fetch_unclaimed_profiles(self):
         """Shows all unclaimed profiles on the google sheet"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
         # Creates a list with all the unclaimed profiles
         raw_unclaimed_profiles = profile_sheet.col_values(2)
+
         # Clears all the flags before proceeding
         self.unclaimed_profiles.clear()
         self.unclaimed_profiles_list = []
@@ -79,6 +83,9 @@ class PHandler():
     def fetch_claimed_profiles(self, user):
         """Fetches all profiles linked to a specific user"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
         # empty flags to store data in
         self.error = ''
         self.claimed_profiles = {}
@@ -111,6 +118,9 @@ class PHandler():
     def check_active_profile(self, user):
         """Checks which profile the user has active"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
         # Finds the user in the database
         user_location = self.check_user_sheet(user)
 
@@ -120,6 +130,9 @@ class PHandler():
     def check_user_sheet(self, user):
         """Checks user sheet for existing profiles"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+        
         # Fetches all the data from the first colom for user IDs
         raw_user_data = user_sheet.col_values(1)
 
@@ -140,6 +153,9 @@ class PHandler():
     def check_claim_input(self, claim_input, user):
         """Checks wether the input matches anything in dict"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
         # Refreshes the Dict
         d_unclaimed_profiles = self.fetch_unclaimed_profiles()
 
@@ -158,6 +174,9 @@ class PHandler():
 
     def claim_profile(self, claim_input, user, filtered_input):
         """Allows you to claim a profile"""
+
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
 
         # Updates the profile page
         profile_sheet.update_cell(int(claim_input), 15, 'claimed')
@@ -193,6 +212,9 @@ class PHandler():
     def show_claimed_profiles(self, user):
         """Shows the claimed profiles to the user"""
 
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
         # Fills the profile list to print back to the user
         self.fetch_claimed_profiles(user)
 
@@ -205,6 +227,9 @@ class PHandler():
 
     def unclaim_profile(self, profile_number, user):
         """Function that lets you unclaim profiles"""
+
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
 
         # Generates the dict with profile locations
 
@@ -244,6 +269,9 @@ class PHandler():
 
     def find_value(self, user, active_profile, request, request_type):
         """Function that finds associated values on the google sheets"""
+
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
 
         # Finds the active profile name on the profile sheet
         profile_loc = profile_sheet.find(active_profile)
@@ -500,7 +528,12 @@ class PHandler():
         if prof_bonus == 0:
             return prof_bonus
 
+    def check_auth(self):
+
+        try:
+            ping = profile_sheet.cell(1,1)
+        except Exception:
+            Client.login()
+
 
 my_handler = PHandler()
-
-

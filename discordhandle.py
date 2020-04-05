@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 
 # 1
 from discord.ext import commands
-
+from discord.ext.commands import ConversionError
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
 # 2
 bot = commands.Bot(command_prefix='!')
+bot.remove_command('help')
 bf = bot_functions.RollBot()
 ng = name_gen.NameGen()
 ph = profile_handler.PHandler()
@@ -42,6 +43,7 @@ async def celebrate(ctx):
 @bot.command(name='r')
 async def roll_dice(ctx, user_input, optional_input=""):
     """Function that gets a user input and passes it along to get processed"""
+
     # Sends the user input to be processed bot_functions
     bf.roll_input(user_input, optional_input)
 
@@ -107,7 +109,7 @@ async def name_help(ctx):
     )
 
 
-@bot.command(name='Sprofile')
+@bot.command(name='showprofiles')
 async def com_fetch_unclaimed_profiles(ctx):
     """Command that shows you all unclaimed profiles"""
 
@@ -126,7 +128,7 @@ async def com_fetch_unclaimed_profiles(ctx):
             )
 
 
-@bot.command(name='Cprofile')
+@bot.command(name='claimprofile')
 async def com_claim_profile(ctx, profile_name):
     """Command that lets you claim a profile"""
 
@@ -148,7 +150,7 @@ async def com_claim_profile(ctx, profile_name):
 
 @bot.command(name='myprofiles')
 async def com_show_cprofile(ctx):
-    """Command that lets you claim a profile"""
+    """Command that shows your claimed profiles"""
 
     await ctx.channel.trigger_typing()
 
@@ -167,9 +169,9 @@ async def com_show_cprofile(ctx):
         )
 
 
-@bot.command(name='Dprofile')
+@bot.command(name='unclaimprofile')
 async def com_unclaim_profile(ctx, profile_name):
-    """Command that lets you claim a profile"""
+    """Command that lets you unclaim a profile"""
 
     await ctx.channel.trigger_typing()
 
@@ -303,5 +305,29 @@ async def skill(ctx, skill_input, optional_input=''):
         await ctx.send(
             ctx.message.author.mention + bf.error
         )
+
+
+@bot.command(name='help')
+async def modified_help(ctx):
+    """Shows you all possible options"""
+
+    # Opens the help text files and puts it in a variable
+    with open(os.path.join("textfiles", "bot_help.txt")) as f:
+        help_text = f.read()
+
+    # sends the opened text file through discord
+    await ctx.send(
+        ctx.message.author.mention + "\n" + help_text
+    )
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    """Catches missing arguements and notifies the user"""
+
+    if isinstance(error, (ConversionError, commands.MissingRequiredArgument)):
+        await ctx.send(
+            ctx.message.author.mention + ' You are missing some required info please try to add it'
+            )
 
 bot.run(token)
