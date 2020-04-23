@@ -1,13 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('profile_auth_secret.json', scope)
-Client = gspread.authorize(creds)
-
-profile_sheet = Client.open('dnd_profiles').sheet1
-user_sheet = Client.open('dnd_profiles').get_worksheet(1)
-
 
 class PHandler():
     """The class that handles fetching profiles from the google doc"""
@@ -100,16 +93,18 @@ class PHandler():
         del raw_claimed_profiles[0:2]
 
         # Reads all the user profiles adding them to a dictionary
-        for claimed_profiles in raw_claimed_profiles:
+        for claimed_profile in raw_claimed_profiles:
 
-            # Find the location of the profile on the profile sheet
-            prof_location = profile_sheet.find(claimed_profiles).row
-            # Adds the profile name to the list with the right key
-            self.claimed_profiles[str(prof_location)] = str(claimed_profiles)
-            # Neatly adds it to the list for printing back to the user
-            self.claimed_profiles_list.append(
-                str(prof_location) + ': ' + str(claimed_profiles)
-                    )
+            # Checks if it isnt an empty collom
+            if claimed_profile != '':
+                # Find the location of the profile on the profile sheet
+                prof_location = profile_sheet.find(claimed_profile).row
+                # Adds the profile name to the list with the right key
+                self.claimed_profiles[str(prof_location)] = str(claimed_profile)
+                # Neatly adds it to the list for printing back to the user
+                self.claimed_profiles_list.append(
+                    str(prof_location) + ': ' + str(claimed_profile)
+                        )
 
         # gets the dict out of the flag so quick inputs dont break it
         d_claimed_profiles = self.claimed_profiles
@@ -132,7 +127,7 @@ class PHandler():
 
         # reauthorizes the token if no longer authorized
         self.check_auth()
-        
+
         # Fetches all the data from the first colom for user IDs
         raw_user_data = user_sheet.col_values(1)
 
@@ -208,6 +203,44 @@ class PHandler():
             # Finds an empty col to add the profile
             empty_col = self.fetch_empty_col(user_location)
             user_sheet.update_cell(user_location, empty_col, filtered_input)
+
+    def select_active_profile(self, user, request_p):
+        "Lets you pick which profile you want active"
+
+        # reauthorizes the token if no longer authorized
+        self.check_auth()
+
+        # Checks wether the profile you are trying to select is claimed by you
+        # and is not already set as the active profile
+        if request_p in self.fetch_claimed_profiles(user) and \
+                profile_sheet.cell(request_p, 2).value != self.check_active_profile(user):
+
+            # Handles setting the old active profile to inactive
+            old_active_p = self.check_active_profile(user)
+            old_ap_loc = profile_sheet.find(old_active_p).row
+            profile_sheet.update_cell(old_ap_loc, 17, 'inactive')
+
+            # Sets new profile to active
+            profile_sheet.update_cell(request_p, 17, 'active')
+
+            # updates the active profile on the user sheet
+            user_loc = self.check_user_sheet(user)
+            user_sheet.update_cell(user_loc, 2, profile_sheet.cell(request_p, 2).value)
+
+        # Gives an error if you select the already active profile
+        elif request_p in self.fetch_claimed_profiles(user) and \
+                profile_sheet.cell(request_p, 2).value == self.check_active_profile(user):
+
+            self.error = 'The profile you have selected is already active'
+
+        # Gives an error if you input gibberish
+        else:
+
+            self.error = 'Could not find a claimed profile by that number.' + \
+                ' Please type "!myprofiles" to find the correct number'
+
+
+
 
     def show_claimed_profiles(self, user):
         """Shows the claimed profiles to the user"""
@@ -531,9 +564,16 @@ class PHandler():
     def check_auth(self):
 
         try:
-            ping = profile_sheet.cell(1,1)
+            _ = profile_sheet.cell(1, 1)
         except Exception:
             Client.login()
 
+
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('profile_auth_secret.json', scope)
+Client = gspread.authorize(creds)
+
+profile_sheet = Client.open('dnd_profiles').sheet1
+user_sheet = Client.open('dnd_profiles').get_worksheet(1)
 
 my_handler = PHandler()

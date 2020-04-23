@@ -22,7 +22,11 @@ class RollBot():
         self.sort = False
         self.adv = False
         # a flag to save the number of the dropped roll on an adv roll
-        self.adv_dropped_roll = ''
+        self.dropped_roll = ''
+        # flags for rolling stats for a char
+        self.d_stats = {}
+        self.dropped_d_stats = {}
+        self.result_d_stats = {}
 
     def roll_input(self, user_input, optional_input):
         """complicated as fuck function that handles input without breaking"""
@@ -37,7 +41,7 @@ class RollBot():
         # The modifier is either a + or a -, stored for easy acces
         self.modifier = ''
         self.modifier_number = ''
-        self.adv_dropped_roll = ''
+        self.dropped_roll = ''
 
         # this code is run in try to catch atribute errors due to a wrong input
         try:
@@ -197,7 +201,7 @@ class RollBot():
                 self.sort = True
                 self.roll_dice(self.number_of_dice, self.size_of_dice)
                 # Stores the dropped roll before deleting it from last_roll
-                self.adv_dropped_roll = self.last_roll[0]
+                self.dropped_roll = self.last_roll[0]
                 del self.last_roll[0]
                 # Returns flag to default state
                 self.adv = False
@@ -221,7 +225,7 @@ class RollBot():
                 self.sort = True
                 self.roll_dice(self.number_of_dice, self.size_of_dice)
                 # Stores the dropped roll before deleting it from last_roll
-                self.adv_dropped_roll = self.last_roll[1]
+                self.dropped_roll = self.last_roll[1]
                 del self.last_roll[1]
                 # Returns flag to default state
                 self.adv = False
@@ -264,7 +268,7 @@ class RollBot():
 
         else:
             self.error = \
-                ' PLACEHOLDER TEXT'
+                'That isnt a skill, either type a skill or use "!check/!save"'
 
     def roll_request(self, user, save_type, request_type, optional_input):
         """Function that handles rolling the appropriate saves"""
@@ -280,6 +284,17 @@ class RollBot():
         else:
             modified_roll = '1d20' + str(ph.find_value(user, active_profile, save_type, request_type))
             self.roll_input(modified_roll, optional_input)
+
+    def roll_stats(self):
+        """Lets you roll new stats for a char"""
+
+        for stat in range(6):
+            self.roll_input('4d6', 'sort')
+            self.dropped_d_stats[stat] = self.last_roll[0]
+            del self.last_roll[0]
+            self.calculate_roll()
+            self.result_d_stats[stat] = self.result
+            self.d_stats[stat] = self.last_roll
 
 
 # The regex that looks through the input for key information.

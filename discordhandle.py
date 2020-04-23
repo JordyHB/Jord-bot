@@ -48,11 +48,11 @@ async def roll_dice(ctx, user_input, optional_input=""):
     bf.roll_input(user_input, optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.adv_dropped_roll != '' and bf.error == '':
+    if bf.dropped_roll != '' and bf.error == '':
         bf.calculate_roll()
         await ctx.send(
             ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.adv_dropped_roll + ', Result:` ' +
+            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
             ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
             str(bf.modifier_number) + ' = ' + str(bf.result)
         )
@@ -199,6 +199,23 @@ async def addprofile(ctx):
     )
 
 
+@bot.command(name='selectprofile')
+async def selectprofile(ctx, request_p):
+    """a command that lets you select your active profile"""
+
+    await ctx.channel.trigger_typing()
+
+    user = ctx.message.author.id
+    ph.select_active_profile(user, request_p)
+
+    if ph.error == '':
+        print('complete succes')
+
+    else:
+        print(ph.error)
+
+
+
 @bot.command(name='save')
 async def save(ctx, save_input, optional_input=''):
     """a command that lets you roll a save with the correct modifiers"""
@@ -210,11 +227,11 @@ async def save(ctx, save_input, optional_input=''):
     bf.check_request_input(user, save_input, 'save', optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.adv_dropped_roll != '' and bf.error == '':
+    if bf.dropped_roll != '' and bf.error == '':
         bf.calculate_roll()
         await ctx.send(
             ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.adv_dropped_roll + ', Result:` ' +
+            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
             ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
             str(bf.modifier_number) + ' = ' + str(bf.result)
         )
@@ -246,11 +263,11 @@ async def check(ctx, check_input, optional_input=''):
     bf.check_request_input(user, check_input, 'check', optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.adv_dropped_roll != '' and bf.error == '':
+    if bf.dropped_roll != '' and bf.error == '':
         bf.calculate_roll()
         await ctx.send(
             ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.adv_dropped_roll + ', Result:` ' +
+            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
             ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
             str(bf.modifier_number) + ' = ' + str(bf.result)
         )
@@ -282,11 +299,11 @@ async def skill(ctx, skill_input, optional_input=''):
     bf.check_skill_input(user, skill_input, 'skill', optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.adv_dropped_roll != '' and bf.error == '':
+    if bf.dropped_roll != '' and bf.error == '':
         bf.calculate_roll()
         await ctx.send(
             ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.adv_dropped_roll + ', Result:` ' +
+            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
             ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
             str(bf.modifier_number) + ' = ' + str(bf.result)
         )
@@ -305,6 +322,35 @@ async def skill(ctx, skill_input, optional_input=''):
         await ctx.send(
             ctx.message.author.mention + bf.error
         )
+
+
+@bot.command(name='newstats')
+async def stat_roller(ctx):
+    """Command that gets you all the stats you need for a new char"""
+
+    bf.roll_stats()
+    formatted_stats = []
+
+    # A loop that gets the six results for the 6 stats
+    for stat in range(6):
+
+        # Combines all the info of what rolls were dropped
+        formatted_stat = '```Here is stat: ' + str(stat + 1) + '\n' + \
+            ', '.join(bf.d_stats[stat]) + \
+            ' = ' + str(bf.result_d_stats[stat]) + \
+            '\nDropped: ' + \
+            str(bf.dropped_d_stats[stat]) + \
+            '```'
+        # adds them all to a list for neater printback
+        formatted_stats.append(formatted_stat)
+
+        total_stat_point = 0
+        for stat in bf.result_d_stats:
+            total_stat_point += bf.result_d_stats[stat]
+
+    await ctx.send(
+        ctx.message.author.mention + "".join(formatted_stats) + '\nYou have a total of: ' + str(total_stat_point) + ' points.'
+    )
 
 
 @bot.command(name='help')
@@ -329,5 +375,8 @@ async def on_command_error(ctx, error):
         await ctx.send(
             ctx.message.author.mention + ' You are missing some required info please try to add it'
             )
+
+    else:
+        print(error)
 
 bot.run(token)
