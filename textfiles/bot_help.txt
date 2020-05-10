@@ -3,7 +3,7 @@
 1. !addprofile (gives you a link to add a new profile to the pool)
 2. !showprofiles (shows you all unclaimed profiles)
 3. !myprofiles (shows you all the progress you claimed)
-4. !activeprofile (shows you youre active profile) [Not working yet]
+4. !activeprofile (shows you your active profile) [Not working yet]
 5. !claimprofile (lets you claim a profile)
 6. !unclaimprofile (lets you unclaim a profile)
 7. !selectprofile (lets you select which profile you want active)

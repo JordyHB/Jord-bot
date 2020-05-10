@@ -86,7 +86,7 @@ class RollBot():
                     len(str(user_input)) > \
                     len(str(self.number_of_dice) +
                         str(self.size_of_dice) + 'D'):
-                self.error = "Incorrect modifier. Please use + or -"
+                self.error = " Incorrect modifier. Please use + or -"
                 return
 
             # Sets modifier to +0 if no +/- is entered.
@@ -137,10 +137,10 @@ class RollBot():
         # Catches and attribute error on a wrong input and notifies the user.
         except AttributeError:
             self.error = \
-                "Invalid input please follow this format (1)d20(+/-(5))"
+                " Invalid input please follow this format (1)d20(+/-(5))"
         except ValueError:
             self.error = \
-                "Invalid input, please Make sure dice size is bigger than 0"
+                " Invalid input, please Make sure dice size is bigger than 0"
 
     def roll_dice(self, number_of_dice, size_of_dice):
         """Simple function that rolls dice"""
@@ -229,61 +229,6 @@ class RollBot():
                 del self.last_roll[1]
                 # Returns flag to default state
                 self.adv = False
-
-    def check_request_input(self, user, request_input, request_type, optional_input):
-        """Function that checks if you gave a valid input"""
-
-        valid_inputs = ['str', 'dex', 'con', 'int', 'wis', 'cha']
-        request_input = request_input.lower()
-
-        # Checks wether its a valid input before handing it off
-        if request_input in valid_inputs:
-
-            self.roll_request(user, request_input, request_type, optional_input)
-
-        else:
-            self.error = \
-                ' Please specifiy the type of check or save(str/dex/con/int/wis/cha)'
-
-    def check_skill_input(self, user, request_input, request_type, optional_input):
-        """Function that checks if you gave a valid input"""
-
-        valid_inputs = ['Acrobatics', 'Acro', 'Animal Handling', 'Ani', 'Arcana', 'Arc', 'Athletics', 'Ath', 'Deception', 'Dec', 'History', 'His', 'Insight', 'Insi', 'Intimidation', 'Inti', 'Investigation', 'Inv', 'Medicine', 'Med', 'Nature', 'Nat', 'Perception', 'Perc', 'Performance', 'Perf', 'Persuasion', 'Pers', 'Religion', 'Reli', 'Sleight Of Hand', 'Soh', 'Stealth', 'Ste', 'Survival', 'Surv']
-
-        # Dict that stores the abreviations
-        abr_dict = {'Acro': 'Acrobatics', 'Ani': 'Animal Handling', 'Arc': 'Arcana', 'Ath': 'Athletics', 'Dec': 'Deception', 'His': 'History', 'Insi': 'Insight', 'Inti': 'Intimidation', 'Inv': 'Investigation', 'Med': 'Medicine', 'Nat': 'Nature', 'Perc': 'Perception', 'Perf': 'Performance', 'Pers': 'Persuasion', 'Reli': 'Religion', 'Soh': 'Sleight Of Hand', 'Ste': 'Stealth', 'Surv': 'Survival'}
-
-        request_input = request_input.lower().title()
-        # Checks if you are using an abreviation before updating it
-        try:
-            request_input = abr_dict[request_input]
-
-        except KeyError:
-            pass
-
-        # Checks whether its a valid input before handing it off
-        if request_input in valid_inputs:
-
-            self.roll_request(user, request_input, request_type, optional_input)
-
-        else:
-            self.error = \
-                'That isnt a skill, either type a skill or use "!check/!save"'
-
-    def roll_request(self, user, save_type, request_type, optional_input):
-        """Function that handles rolling the appropriate saves"""
-
-        # Checks wether user has an active profile
-        active_profile = ph.check_active_profile(user)
-
-        if active_profile == '' or active_profile == 'none':
-            self.error = \
-                "You have no active profile, please claim or select one"
-
-        # Moves the process allong if the user has an active profile
-        else:
-            modified_roll = '1d20' + str(ph.find_value(user, active_profile, save_type, request_type))
-            self.roll_input(modified_roll, optional_input)
 
     def roll_stats(self):
         """Lets you roll new stats for a char"""

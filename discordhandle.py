@@ -17,6 +17,7 @@ bot.remove_command('help')
 bf = bot_functions.RollBot()
 ng = name_gen.NameGen()
 ph = profile_handler.PHandler()
+ph.load_cache()
 given_stats = []
 
 
@@ -124,7 +125,8 @@ async def com_fetch_unclaimed_profiles(ctx):
 
     else:
         await ctx.send(
-            "The current unclaimed profiles are:\n" + "```" + '\n'.join(ph.unclaimed_profiles_list) + "```"
+            "The current unclaimed profiles are:\n" + "```" +
+            '\n'.join(ph.unclaimed_profiles_list) + "```"
             )
 
 
@@ -144,7 +146,8 @@ async def com_claim_profile(ctx, profile_name):
 
     else:
         await ctx.send(
-            ctx.message.author.mention + ' You have succesfully claimed ' + ph.claim_printback + " :yeetyeet:"
+            ctx.message.author.mention + ' You have succesfully claimed ' +
+            ph.claim_printback
         )
 
 
@@ -155,7 +158,8 @@ async def com_show_cprofile(ctx):
     await ctx.channel.trigger_typing()
 
     user = ctx.message.author.id
-    ph.show_claimed_profiles(user)
+    claimed_profiles = ph.show_claimed_profiles(user)
+    print(claimed_profiles)
 
     if ph.error != '':
         await ctx.channel.send(
@@ -165,7 +169,8 @@ async def com_show_cprofile(ctx):
     else:
         await ctx.channel.send(
             ctx.message.author.mention + " Your claimed profiles are:\n" +
-            "```" + '\n'.join(ph.claimed_profiles_list) + "```"
+            "```" + '\n'.join(claimed_profiles) +
+            "```"
         )
 
 
@@ -185,7 +190,8 @@ async def com_unclaim_profile(ctx, profile_name):
 
     else:
         await ctx.send(
-            ctx.message.author.mention + ' You have succesfully unclaimed ' + ph.print_back
+            ctx.message.author.mention + ' You have succesfully unclaimed ' +
+            ph.print_back
             )
 
 
@@ -209,11 +215,15 @@ async def selectprofile(ctx, request_p):
     ph.select_active_profile(user, request_p)
 
     if ph.error == '':
-        print('complete succes')
+        await ctx.send(
+            ctx.message.author.mention + ' you have succesfully selected: ' +
+            ph.cached_users[user]['active_profile']
+        )
 
     else:
-        print(ph.error)
-
+        await ctx.send(
+            ctx.message.author.mention + ph.error
+        )
 
 
 @bot.command(name='save')
@@ -222,35 +232,47 @@ async def save(ctx, save_input, optional_input=''):
 
     await ctx.channel.trigger_typing()
 
-    user = ctx.message.author.id
     # Gets the user Id and hands it off to another class
-    bf.check_request_input(user, save_input, 'save', optional_input)
+    user = ctx.message.author.id
 
-    # Prints results for advantage rolls if no errors came up.
-    if bf.dropped_roll != '' and bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
-            ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
-            ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
-            str(bf.modifier_number) + ' = ' + str(bf.result)
-        )
+    mod = ph.request_mod(user, save_input, 'save')
+    user_input = '1d20' + str(mod)
 
-    # prints rolls that didnt get advantage and no errors
-    elif bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
+    # Makes sure it only rolls the dice if no errors came up with the profile
+    if ph.error == '':
+        # Rolls the dice with the correct modifiers
+        bf.roll_input(user_input, optional_input)
+
+        # Prints results for advantage rolls if no errors came up.
+        if bf.dropped_roll != '' and bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
                 ctx.message.author.mention +
-                bf.input_last_roll +
-                ', '.join(bf.last_roll) + ' ' +
-                str(bf.modifier) + ' ' +
-                str(bf.modifier_number) + ' = ' + str(bf.result))
+                ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
+                ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                str(bf.modifier_number) + ' = ' + str(bf.result)
+            )
 
+        # prints rolls that didnt get advantage and no errors
+        elif bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
+                    ctx.message.author.mention +
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' +
+                    str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+        else:
+            await ctx.send(
+                ctx.message.author.mention + bf.error
+            )
+
+    # Sends the error for issues in with the profile
     else:
         await ctx.send(
-            ctx.message.author.mention + bf.error
+            ctx.message.author.mention + ph.error
         )
-
 
 @bot.command(name='check')
 async def check(ctx, check_input, optional_input=''):
@@ -258,33 +280,45 @@ async def check(ctx, check_input, optional_input=''):
 
     await ctx.channel.trigger_typing()
 
-    user = ctx.message.author.id
     # Gets the user Id and hands it off to another class
-    bf.check_request_input(user, check_input, 'check', optional_input)
+    user = ctx.message.author.id
+
+    mod = ph.request_mod(user, check_input, 'check')
+    user_input = '1d20' + str(mod)
+
+    if ph.error == '':
+        # Rolls the dice with the correct modifiers
+        bf.roll_input(user_input, optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.dropped_roll != '' and bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
-            ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
-            ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
-            str(bf.modifier_number) + ' = ' + str(bf.result)
-        )
-
-    # prints rolls that didnt get advantage and no errors
-    elif bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
+        if bf.dropped_roll != '' and bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
                 ctx.message.author.mention +
-                bf.input_last_roll +
-                ', '.join(bf.last_roll) + ' ' +
-                str(bf.modifier) + ' ' +
-                str(bf.modifier_number) + ' = ' + str(bf.result))
+                ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
+                ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                str(bf.modifier_number) + ' = ' + str(bf.result)
+            )
 
+        # prints rolls that didnt get advantage and no errors
+        elif bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
+                    ctx.message.author.mention +
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' +
+                    str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+        else:
+            await ctx.send(
+                ctx.message.author.mention + bf.error
+            )
+
+    # Sends the error for issues in with the profile
     else:
         await ctx.send(
-            ctx.message.author.mention + bf.error
+            ctx.message.author.mention + ph.error
         )
 
 
@@ -294,33 +328,45 @@ async def skill(ctx, skill_input, optional_input=''):
 
     await ctx.channel.trigger_typing()
 
-    user = ctx.message.author.id
     # Gets the user Id and hands it off to another class
-    bf.check_skill_input(user, skill_input, 'skill', optional_input)
+    user = ctx.message.author.id
+
+    mod = ph.request_mod(user, skill_input, 'skill')
+    user_input = '1d20' + str(mod)
+
+    if ph.error == '':
+        # Rolls the dice with the correct modifiers
+        bf.roll_input(user_input, optional_input)
 
     # Prints results for advantage rolls if no errors came up.
-    if bf.dropped_roll != '' and bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
-            ctx.message.author.mention +
-            ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
-            ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
-            str(bf.modifier_number) + ' = ' + str(bf.result)
-        )
-
-    # prints rolls that didnt get advantage and no errors
-    elif bf.error == '':
-        bf.calculate_roll()
-        await ctx.send(
+        if bf.dropped_roll != '' and bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
                 ctx.message.author.mention +
-                bf.input_last_roll +
-                ', '.join(bf.last_roll) + ' ' +
-                str(bf.modifier) + ' ' +
-                str(bf.modifier_number) + ' = ' + str(bf.result))
+                ' `Dropped roll: ' + bf.dropped_roll + ', Result:` ' +
+                ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                str(bf.modifier_number) + ' = ' + str(bf.result)
+            )
 
+        # prints rolls that didnt get advantage and no errors
+        elif bf.error == '':
+            bf.calculate_roll()
+            await ctx.send(
+                    ctx.message.author.mention +
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' +
+                    str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+        else:
+            await ctx.send(
+                ctx.message.author.mention + bf.error
+            )
+
+    # Sends the error for issues in with the profile
     else:
         await ctx.send(
-            ctx.message.author.mention + bf.error
+            ctx.message.author.mention + ph.error
         )
 
 
@@ -349,7 +395,8 @@ async def stat_roller(ctx):
             total_stat_point += bf.result_d_stats[stat]
 
     await ctx.send(
-        ctx.message.author.mention + "".join(formatted_stats) + '\nYou have a total of: ' + str(total_stat_point) + ' points.'
+        ctx.message.author.mention + "".join(formatted_stats) +
+        '\nYou have a total of: ' + str(total_stat_point) + ' points.'
     )
 
 
@@ -367,16 +414,46 @@ async def modified_help(ctx):
     )
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    """Catches missing arguements and notifies the user"""
+@bot.command(name='shutdown')
+async def shutdown(ctx):
+    """the command to shutdown"""
 
-    if isinstance(error, (ConversionError, commands.MissingRequiredArgument)):
-        await ctx.send(
-            ctx.message.author.mention + ' You are missing some required info please try to add it'
-            )
+    user = ctx.message.author.id
+    shutting_down = ph.shutdown(user)
+
+    if shutting_down is True:
+        await ctx.send(ph.print_back)
+        exit()
 
     else:
-        print(error)
+        await ctx.send(ph.print_back)
+
+@bot.command(name='repair')
+async def request_repair(ctx):
+    """Fixes the cache after an incorrect shutdown"""
+
+    user = ctx.message.author.id
+    ph.repair_cache(user)
+    # Sends a msg back with the outcome
+    await ctx.send(ph.print_back)
+
+
+#@bot.event
+#async def on_command_error(ctx, error):
+#   """Catches missing arguements and notifies the user"""
+
+#    if isinstance(error, (ConversionError, commands.MissingRequiredArgument)):
+#        await ctx.send(
+#            ctx.message.author.mention +
+#            ' You are missing some required info please try to add it'
+#            )
+
+#    if isinstance(error, (ConversionError, commands.ValueError)):
+#        await ctx.send(
+#            ctx.message.author.mention + ' Invalid input'
+#            )
+
+#    else:
+#        print(error)
 
 bot.run(token)

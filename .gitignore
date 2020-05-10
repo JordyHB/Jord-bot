@@ -2,3 +2,4 @@
 __pycache__
 profile_auth_secret.json
 token.pickle
+cached_data.json
