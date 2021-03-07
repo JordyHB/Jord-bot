@@ -4,6 +4,7 @@ import bot_functions
 import name_gen
 import profile_handler
 from dotenv import load_dotenv
+import random
 
 # 1
 from discord.ext import commands
@@ -57,6 +58,59 @@ async def roll_dice(ctx, user_input, optional_input=""):
             ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
             str(bf.modifier_number) + ' = ' + str(bf.result)
         )
+
+    # send the results for hidden rolls and stores if no errors came up.
+    elif bf.hidden is True and bf.error == '':
+        bf.calculate_roll()
+
+        # creates a dict for the user and adds the results if no dict exists
+        if not bool(bf.hidden_rolls):
+
+            bf.hidden_rolls[ctx.author.name] = []
+            bf.hidden_rolls[ctx.author.name].append(
+                bf.input_last_roll +
+                ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                str(bf.modifier_number) + ' = ' + str(bf.result))
+
+        # adds up to 5 entries in a users hidden roll list
+        elif bool(bf.hidden_rolls):
+
+            # checks if theres already a list for the user
+            if ctx.author.name not in bf.hidden_rolls.keys():
+                bf.hidden_rolls[ctx.author.name] = []
+
+            # checks how many hidden rolls are saved for the user
+            number_of_rolls = len(bf.hidden_rolls[ctx.author.name])
+
+            # Stores a roll if less than 5 are stored
+            if number_of_rolls < 5:
+
+                bf.hidden_rolls[ctx.author.name].append(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+            # Deletes the oldest entry and stores the newest one
+            elif number_of_rolls >= 5:
+
+                bf.hidden_rolls[ctx.author.name].pop(0)
+
+                bf.hidden_rolls[ctx.author.name].append(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+
+        # Private messages the result to the user
+        await ctx.author.send(
+                bf.input_last_roll +
+                ', '.join(bf.last_roll) + ' ' +
+                str(bf.modifier) + ' ' +
+                str(bf.modifier_number) + ' = ' + str(bf.result))
+
+        # sends a message to the channel the command was called from
+        await ctx.send(
+                ctx.message.author.mention + " Remember that you can verify your rolls with !verify.")
 
     # Only outputs the results if no errors came up allong the way and no
     # advantage had to be aplied
@@ -159,7 +213,6 @@ async def com_show_cprofile(ctx):
 
     user = ctx.message.author.id
     claimed_profiles = ph.show_claimed_profiles(user)
-    print(claimed_profiles)
 
     if ph.error != '':
         await ctx.channel.send(
@@ -300,6 +353,59 @@ async def check(ctx, check_input, optional_input=''):
                 str(bf.modifier_number) + ' = ' + str(bf.result)
             )
 
+        # send the results for hidden rolls and stores if no errors came up.
+        elif bf.hidden is True and bf.error == '':
+            bf.calculate_roll()
+
+            # creates a dict for the user and adds the results if no dict exists
+            if not bool(bf.hidden_rolls):
+
+                bf.hidden_rolls[ctx.author.name] = []
+                bf.hidden_rolls[ctx.author.name].append(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+            # adds up to 5 entries in a users hidden roll list
+            elif bool(bf.hidden_rolls):
+
+                # checks if theres already a list for the user
+                if ctx.author.name not in bf.hidden_rolls.keys():
+                    bf.hidden_rolls[ctx.author.name] = []
+
+                # checks how many hidden rolls are saved for the user
+                number_of_rolls = len(bf.hidden_rolls[ctx.author.name])
+
+                # Stores a roll if less than 5 are stored
+                if number_of_rolls < 5:
+
+                    bf.hidden_rolls[ctx.author.name].append(
+                        bf.input_last_roll +
+                        ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                        str(bf.modifier_number) + ' = ' + str(bf.result))
+
+                # Deletes the oldest entry and stores the newest one
+                elif number_of_rolls >= 5:
+
+                    bf.hidden_rolls[ctx.author.name].pop(0)
+
+                    bf.hidden_rolls[ctx.author.name].append(
+                        bf.input_last_roll +
+                        ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                        str(bf.modifier_number) + ' = ' + str(bf.result))
+
+
+            # Private messages the result to the user
+            await ctx.author.send(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' +
+                    str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+            # sends a message to the channel the command was called from
+            await ctx.send(
+                    ctx.message.author.mention + " Remember that you can verify your rolls with !verify.")
+
         # prints rolls that didnt get advantage and no errors
         elif bf.error == '':
             bf.calculate_roll()
@@ -347,6 +453,60 @@ async def skill(ctx, skill_input, optional_input=''):
                 ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
                 str(bf.modifier_number) + ' = ' + str(bf.result)
             )
+
+    # send the results for hidden rolls and stores if no errors came up.
+        elif bf.hidden is True and bf.error == '':
+            bf.calculate_roll()
+
+            # creates a dict for the user and adds the results if no dict exists
+            if not bool(bf.hidden_rolls):
+
+                bf.hidden_rolls[ctx.author.name] = []
+                bf.hidden_rolls[ctx.author.name].append(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+            # adds up to 5 entries in a users hidden roll list
+            elif bool(bf.hidden_rolls):
+
+                # checks if theres already a list for the user
+                if ctx.author.name not in bf.hidden_rolls.keys():
+                    bf.hidden_rolls[ctx.author.name] = []
+
+                # checks how many hidden rolls are saved for the user
+                number_of_rolls = len(bf.hidden_rolls[ctx.author.name])
+
+                # Stores a roll if less than 5 are stored
+                if number_of_rolls < 5:
+
+                    bf.hidden_rolls[ctx.author.name].append(
+                        bf.input_last_roll +
+                        ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                        str(bf.modifier_number) + ' = ' + str(bf.result))
+
+                # Deletes the oldest entry and stores the newest one
+                elif number_of_rolls >= 5:
+
+                    bf.hidden_rolls[ctx.author.name].pop(0)
+
+                    bf.hidden_rolls[ctx.author.name].append(
+                        bf.input_last_roll +
+                        ', '.join(bf.last_roll) + ' ' + str(bf.modifier) + ' ' +
+                        str(bf.modifier_number) + ' = ' + str(bf.result))
+
+
+            # Private messages the result to the user
+            await ctx.author.send(
+                    bf.input_last_roll +
+                    ', '.join(bf.last_roll) + ' ' +
+                    str(bf.modifier) + ' ' +
+                    str(bf.modifier_number) + ' = ' + str(bf.result))
+
+            # sends a message to the channel the command was called from
+            await ctx.send(
+                    ctx.message.author.mention + " Remember that you can verify your rolls with !verify.")
+
 
         # prints rolls that didnt get advantage and no errors
         elif bf.error == '':
@@ -428,6 +588,7 @@ async def shutdown(ctx):
     else:
         await ctx.send(ph.print_back)
 
+
 @bot.command(name='repair')
 async def request_repair(ctx):
     """Fixes the cache after an incorrect shutdown"""
@@ -437,23 +598,133 @@ async def request_repair(ctx):
     # Sends a msg back with the outcome
     await ctx.send(ph.print_back)
 
+@bot.command(name='art')
+async def art(ctx):
+    """a command that posts a random piece of art from the art channel"""
 
-#@bot.event
-#async def on_command_error(ctx, error):
-#   """Catches missing arguements and notifies the user"""
+    # Sets the location of the art channel
+    channel = ctx.guild.get_channel(639622641250074624)
 
-#    if isinstance(error, (ConversionError, commands.MissingRequiredArgument)):
-#        await ctx.send(
-#            ctx.message.author.mention +
-#            ' You are missing some required info please try to add it'
-#            )
+    # fills the dict if empty
+    if not bool(bf.art_dict):
 
-#    if isinstance(error, (ConversionError, commands.ValueError)):
-#        await ctx.send(
-#            ctx.message.author.mention + ' Invalid input'
-#            )
+        async for old_message in channel.history(limit=1000):
+            if old_message.attachments:
+                bf.art_dict[old_message.content] = old_message.attachments[0].url
 
-#    else:
-#        print(error)
+    # Grabs a random piece of art from the dict
+    rand_key = random.choice(list(bf.art_dict))
+
+    # sends the random piece of art
+    await ctx.send(rand_key + '\n' + bf.art_dict[rand_key])
+
+    del bf.art_dict[rand_key]
+    print(len(bf.art_dict))
+
+@bot.command(name='meme')
+async def meme(ctx):
+    """a command that posts a random meme from the meme channel"""
+
+    # Sets the location of the meme channel
+    channel = ctx.guild.get_channel(816849677013876756)
+
+    # fills the dict if empty
+    if not bool(bf.meme_dict):
+
+        async for old_message in channel.history(limit=1000):
+
+            if old_message.attachments:
+
+                bf.meme_dict[len(bf.meme_dict)] = old_message.attachments[0].url
+
+    # Grabs a random piece of art from the dict
+    rand_key = random.choice(list(bf.meme_dict))
+
+    # sends the random piece of art
+    await ctx.send(bf.meme_dict[rand_key])
+
+    del bf.meme_dict[rand_key]
+    print(len(bf.meme_dict))
+
+
+@bot.command(name='verify')
+async def verify(ctx, req_user='', optional_input=''):
+    """lets you verify the hidden rolls"""
+
+    # sets the name of the person that called the command as user
+    user = ctx.message.author.name
+
+    # checks if it is the DM asking for a specific users rolls to verified
+    if ctx.message.mentions:
+        req_user = ctx.message.mentions[0].name
+
+        # Discord users permitted to use the DM versions
+        if user == 'left4twenty':
+            # prints the verification publically
+            if req_user in bf.hidden_rolls.keys() and optional_input == 'public':
+
+                # prints hidden rolls of the requested user in reverse order so they go from newest to oldest
+                await ctx.send('Here are the hidden rolls of ' + ctx.message.mentions[0].mention + ' from newest to oldest:\n' + "\n".join(reversed(bf.hidden_rolls[req_user])))
+
+            elif req_user in bf.hidden_rolls.keys() and optional_input == '':
+
+                # prints hidden rolls of the requested user in reverse order so they go from newest to oldest in a private message
+                await ctx.author.send('Here are the hidden rolls of ' + ctx.message.mentions[0].mention + ' from newest to oldest:\n' + "\n".join(reversed(bf.hidden_rolls[req_user])))
+
+            # prints a statement if requested user doesn't have hidden rolls
+            elif req_user not in bf.hidden_rolls.keys():
+                await ctx.send(ctx.message.mentions[0].mention + " doesn't have any hidden rolls")
+
+            # throws an error
+            else:
+                await ctx.send(ctx.message.author.mention + " invalid inputs, this command only accepts (all/public)")
+
+        # throws an error incase of an unauthorized person
+        else:
+            await ctx.send(ctx.message.author.mention + 'Error 420- DM not found')
+
+    # shows DM all the hidden rolls from all users
+    elif req_user == 'all':
+        # Discord users permitted to use this command
+        if user == 'left4twenty':
+            # loops through the dict of data
+            for key in bf.hidden_rolls.keys():
+                await ctx.author.send('Here are the hidden rolls of ' + key + ' from newest to oldest:\n' + "\n".join(reversed(bf.hidden_rolls[key])))
+
+        # throws an error incase of an unauthorized person
+        else:
+            await ctx.send(ctx.message.author.mention + ' Error 420- DM not found')
+
+    else:
+
+        # checks if user has hidden rolls
+        if user in bf.hidden_rolls.keys():
+
+            #prints hidden rolls in reverse order so they go from newest to oldest
+            await ctx.send(ctx.message.author.mention + ' here are your hidden rolls from newest to oldest:\n' + "\n".join(reversed(bf.hidden_rolls[user])))
+
+        # prints to the user that they don't have any hidden rolls
+        elif user not in bf.hidden_rolls.keys():
+            await ctx.send(ctx.message.author.mention + " you don't have any hidden rolls")
+
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    """Catches missing arguements and notifies the user"""
+
+    #if isinstance(error, (ConversionError, commands.MissingRequiredArgument)):
+    #    await ctx.send(
+    #        ctx.message.author.mention +
+    #        ' You are missing some required info please try to add it'
+    #        )
+
+    # if isinstance(error, (ConversionError, commands.ValueError)):
+    #    await ctx.send(
+    #        ctx.message.author.mention + ' Invalid input'
+    #        )
+
+    #else:
+    #    print(error)
 
 bot.run(token)

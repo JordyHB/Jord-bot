@@ -21,12 +21,17 @@ class RollBot():
         self.modifier_number = ''
         self.sort = False
         self.adv = False
+        self.hidden = False
         # a flag to save the number of the dropped roll on an adv roll
         self.dropped_roll = ''
         # flags for rolling stats for a char
         self.d_stats = {}
         self.dropped_d_stats = {}
         self.result_d_stats = {}
+        # flag for the art/meme/hidden rolls dictionary
+        self.art_dict = {}
+        self.meme_dict = {}
+        self.hidden_rolls = {}
 
     def roll_input(self, user_input, optional_input):
         """complicated as fuck function that handles input without breaking"""
@@ -34,6 +39,7 @@ class RollBot():
         # Resets the status of everything before a new roll
         self.last_roll = []
         self.result = 0
+        self.hidden = False
         # An empty error flag to easily throw errors back through discord
         self.error = ''
         self.number_of_dice = ''
@@ -125,9 +131,14 @@ class RollBot():
                 self.sort = True
                 self.roll_dice(self.number_of_dice, self.size_of_dice)
 
+            elif optional_input.lower() == 'hide':
+                # Rolls the dice like normal but does not show the result in channel.
+                self.hidden = True
+                self.roll_dice(self.number_of_dice, self.size_of_dice)
+
             elif optional_input.lower() != '':
                 self.error = str(optional_input) + \
-                    " is not a valid option. Please try (sort/adv/dadv)"
+                    " is not a valid option. Please try (sort/adv/dadv/hide)"
 
             else:
                 # If everything passed the checks hand offs the proccesed input

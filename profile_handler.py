@@ -203,7 +203,7 @@ class PHandler():
                 update1 = user_sheet.cell(empty_cell, 1)
                 update1.value = str(user)
                 update2 = user_sheet.cell(empty_cell, 2)
-                update2.value = 'none'
+                update2.value = ''
                 user_sheet.update_cells([update1, update2])
                 user_location = empty_cell
                 return user_location
@@ -513,8 +513,8 @@ class PHandler():
 
         # Checks that the user has an active profile
         if self.cached_users[user]['active_profile'] == '':
-            self.error = \
-                ' You have no active profile please select one with !selectprofile'
+
+            self.error = ' You have no active profile please select one with !selectprofile'
 
         else:
             # Gets the requested value from the cache and returns it
